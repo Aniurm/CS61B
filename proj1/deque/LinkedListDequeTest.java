@@ -2,6 +2,9 @@ package deque;
 
 import edu.princeton.cs.algs4.StdRandom;
 import org.junit.Test;
+
+import java.util.Iterator;
+
 import static org.junit.Assert.*;
 
 
@@ -141,4 +144,41 @@ public class LinkedListDequeTest {
         assertEquals(5, i);
     }
 
+    @Test
+    public void iteratorTest() {
+        LinkedListDeque<Integer> lld = new LinkedListDeque<>();
+        lld.addLast((1));
+        lld.addLast((2));
+        lld.addLast((3));
+        lld.addLast((4));
+        lld.addLast((5));
+        Iterator<Integer> test = lld.iterator();
+        assertEquals(1, (int) test.next());
+        assertEquals(2, (int) test.next());
+        assertEquals(3, (int) test.next());
+        assertEquals(4, (int) test.next());
+        assertEquals(5, (int) test.next());
+        assertFalse(test.hasNext());
+    }
+
+    @Test
+    public void equalTest() {
+        LinkedListDeque<Integer> lld = new LinkedListDeque<>();
+        lld.addLast(1);
+        lld.addLast(2);
+        lld.addLast(3);
+        lld.addLast(4);
+
+        LinkedListDeque<Integer> lld2 = new LinkedListDeque<>();
+        lld2.addLast(1);
+        lld2.addLast(2);
+        lld2.addLast(3);
+        lld2.addLast(4);
+
+        assertTrue(lld.equals(lld2));
+        assertFalse(lld.equals(null));
+
+        lld2.removeLast();
+        assertFalse(lld.equals(lld2));
+    }
 }

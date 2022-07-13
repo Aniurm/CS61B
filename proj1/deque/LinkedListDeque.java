@@ -1,8 +1,11 @@
 package deque;
 
 
-public class LinkedListDeque<T> {
+import java.util.Iterator;
+
+public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
     private IntNode sentinel;
+
     private int size;
 
     public class IntNode {
@@ -40,6 +43,7 @@ public class LinkedListDeque<T> {
         size = 1;
     }
 
+    @Override
     public void addFirst(T item) {
         //new node
         IntNode tmp = new IntNode(item, sentinel.next, sentinel);
@@ -50,6 +54,7 @@ public class LinkedListDeque<T> {
         size += 1;
     }
 
+    @Override
     public void addLast(T item) {
         //new node
         IntNode tmp = new IntNode(item, sentinel, sentinel.last);
@@ -60,16 +65,14 @@ public class LinkedListDeque<T> {
         size += 1;
     }
 
-    public boolean isEmpty() {
-        return size == 0;
-    }
-
+    @Override
     public int size() {
         return size;
     }
 
     // print the items from first to last, separated by a space
     // once all the items have been printed, print out a new line
+    @Override
     public void printDeque() {
         int count;
         IntNode cursor = sentinel.next;
@@ -80,6 +83,7 @@ public class LinkedListDeque<T> {
         System.out.println(" ");
     }
 
+    @Override
     public T removeFirst() {
         if (size == 0) {
             return null;
@@ -94,6 +98,7 @@ public class LinkedListDeque<T> {
         return tmp.item;
     }
 
+    @Override
     public T removeLast() {
         if (size == 0) {
             return null;
@@ -108,6 +113,7 @@ public class LinkedListDeque<T> {
         return tmp.item;
     }
 
+    @Override
     public T get(int index) {
         if (size == 0 || index >= size) {
             return null;
@@ -139,6 +145,46 @@ public class LinkedListDeque<T> {
         else {      // recursive case
             return getRecursivehelp(cursor.next, index - 1);
         }
+    }
+
+    public Iterator<T> iterator() {
+        return new LinkedListDequeIterator();
+    }
+
+    private class LinkedListDequeIterator implements Iterator<T> {
+        private IntNode cursor;
+
+        public LinkedListDequeIterator() {
+            cursor = sentinel.next;
+        }
+
+        public boolean hasNext() {
+            return cursor == null;
+        }
+
+        public T next() {
+            T returnItem = cursor.item;
+            cursor = cursor.next;
+            return returnItem;
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) {
+            return false;
+        }
+        LinkedListDeque<T> obj = (LinkedListDeque<T>) o;
+        if (obj.size() != this.size()) {
+            return false;
+        }
+        // traverse and compare two LinkedListDeque
+        for (int i = 0; i < this.size(); i++) {
+            if (obj.get(i) != this.get(i)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
 
