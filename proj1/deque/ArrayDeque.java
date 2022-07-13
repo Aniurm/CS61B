@@ -3,11 +3,11 @@ package deque;
 import java.util.Iterator;
 
 public class ArrayDeque<T> implements Iterable<T>, Deque<T>   {
-    int first;
-    int last;
-    int size;
-    int capacity;
-    T[] array;
+    private int first;
+    private int last;
+    private int size;
+    private int capacity;
+    private T[] array;
 
     // create an empty array deque
     public ArrayDeque() {
@@ -18,7 +18,7 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T>   {
         array = (T []) new Object[8];
     }
 
-    public void resize(int capacity) {
+    private void resize(int capacity) {
         T[] newArray = (T []) new Object[capacity];
         // copy data
         int start = capacity / 3;
@@ -165,7 +165,7 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T>   {
         return new ArrayDequeIterator();
     }
 
-    public class ArrayDequeIterator implements Iterator<T>{
+    private class ArrayDequeIterator implements Iterator<T> {
         int count;
         int cursor;
 
@@ -198,7 +198,7 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T>   {
         if (o == null) {
             return false;
         }
-        ArrayDeque<T> obj = (ArrayDeque<T>) o;
+        Deque<T> obj = (Deque<T>) o;
         if (obj.size() != this.size()) {
             return false;
         }
@@ -212,25 +212,7 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T>   {
         return true;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    public T[] getArray() {
+        return array;
+    }
 }
