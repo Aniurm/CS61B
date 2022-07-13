@@ -177,4 +177,49 @@ public class ArrayDequeTest {
         lld2.removeLast();
         assertFalse(lld.equals(lld2));
     }
+
+    @Test
+    public void Test005() {
+        ArrayDeque<Integer> ts = new ArrayDeque<>();
+        ts.addLast(0);
+        assertEquals(0, (int) ts.removeFirst());
+        assertTrue(ts.isEmpty());
+        assertTrue(ts.isEmpty());
+        ts.addLast(4);
+        assertFalse(ts.isEmpty());
+        assertEquals(4, (int) ts.removeFirst());
+        ts.addLast(7);
+        ts.removeFirst();
+        ts.addLast(9);
+        assertEquals(9, (int) ts.removeFirst());
+    }
+
+    @Test
+    public void Test011() {
+        ArrayDeque<Integer> ts = new ArrayDeque<>();
+        ts.addLast(0);
+        ts.addLast(1);
+        assertEquals(0, (int)ts.get(0));
+        ts.addLast(3);
+        ts.get(0);
+        ts.get(1);
+        ts.get(1);
+        ts.addFirst(7);
+        ts.removeFirst();
+        ts.get(0);
+        ts.removeLast();
+        ts.removeFirst();
+        ts.removeFirst();
+        ts.addLast(13);
+        ts.get(0);
+        ts.get(0);
+        ts.addLast(16);
+        ts.addLast(17);
+        ts.removeLast();
+        ts.removeLast();
+        ts.removeFirst();
+        ts.addLast(21);
+        ts.get(0);
+        ts.removeFirst();
+    }
 }
