@@ -1,16 +1,16 @@
 package capers;
 
-import java.io.File;
-import java.io.Serializable;
+import java.io.*;
+
 import static capers.Utils.*;
 
 /** Represents a dog that can be serialized.
- * @author TODO
+ * @author Aniurm
 */
-public class Dog { // TODO
+public class Dog implements Serializable{
 
     /** Folder that dogs live in. */
-    static final File DOG_FOLDER = null; // TODO (hint: look at the `join`
+    static final File DOG_FOLDER = Utils.join(CapersRepository.CAPERS_FOLDER, "dogs");
                                          //      function in Utils)
 
     /** Age of dog. */
@@ -39,8 +39,18 @@ public class Dog { // TODO
      * @return Dog read from file
      */
     public static Dog fromFile(String name) {
-        // TODO (hint: look at the Utils file)
-        return null;
+        Dog aDog;
+        File inFile = new File(name);
+        try {
+            ObjectInputStream inp =
+                    new ObjectInputStream(new FileInputStream(inFile));
+            aDog = (Dog) inp.readObject();
+            inp.close();
+        } catch (IOException | ClassNotFoundException excp) {
+            System.out.println("fromfile Error");
+            aDog = null;
+        }
+        return aDog;
     }
 
     /**
@@ -56,7 +66,16 @@ public class Dog { // TODO
      * Saves a dog to a file for future use.
      */
     public void saveDog() {
-        // TODO (hint: don't forget dog names are unique)
+        File outFile = new File(name);
+
+        try {
+            ObjectOutputStream out =
+                    new ObjectOutputStream(new FileOutputStream(outFile));
+            out.writeObject(this);
+            out.close();
+        } catch (IOException excp) {
+            System.out.println("Error");
+        }
     }
 
     @Override
