@@ -25,7 +25,7 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T>   {
         for (int i = start, j = first; i < start + this.size; i++, j++) {
             if (j == this.capacity) {
                 j = 0;
-            } else if (i == this.capacity) {
+            } else if (i == newCapacity) {
                 i = 0;
             }
 
