@@ -137,7 +137,14 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T>   {
 
         if (first <= last) {
             size--;
-            return array[last--];
+            if (last - 1 >= 0) {
+                return array[last--];
+            }
+            else {
+                T returnItem = array[last];
+                last = capacity - 1;
+                return returnItem;
+            }
         } else {
             T result = array[last];
             if (last == 0) {

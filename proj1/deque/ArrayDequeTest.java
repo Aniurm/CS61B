@@ -1,5 +1,6 @@
 package deque;
 
+import edu.princeton.cs.introcs.StdRandom;
 import org.junit.Test;
 
 import java.util.Iterator;
@@ -221,5 +222,55 @@ public class ArrayDequeTest {
         ts.addLast(21);
         ts.get(0);
         ts.removeFirst();
+    }
+
+    @Test
+    public void randomTest() {
+        java.util.Deque<Integer> right = new java.util.ArrayDeque<Integer>();
+        Deque<Integer> wrong = new ArrayDeque<>();
+
+        int N = 50000;
+        for (int i = 0; i < N; i++) {
+            int operationNumber = StdRandom.uniform(0, 3);
+            if (operationNumber == 0) {
+                //addFirst
+                int randVal = StdRandom.uniform(0, 100);
+                right.addFirst(randVal);
+                wrong.addFirst(randVal);
+            } else if (operationNumber == 1) {
+                //remove last
+                if (right.size() <= 0) {
+                    continue;
+                }
+                assertEquals((int) right.removeLast(), (int) wrong.removeLast());
+            } else {
+                //isEmpty
+                assertEquals(right.isEmpty(), wrong.isEmpty());
+            }
+        }
+    }
+
+    @Test
+    public void randomGet() {
+        Deque<Integer> wrong = new ArrayDeque<>();
+        Deque<Integer> right = new LinkedListDeque<>();
+
+        int N = 500000;
+        for (int i = 0; i < N; i++) {
+            int operationNumber = StdRandom.uniform(0, 2);
+            if (operationNumber == 0) {
+                //addLast
+                int randVal = StdRandom.uniform(0, 100);
+                wrong.addLast(randVal);
+                right.addLast(randVal);
+            } else {
+                //get
+                if (right.isEmpty()) {
+                    continue;
+                }
+                int randVal = StdRandom.uniform(0, right.size());
+                assertEquals(wrong.get(randVal), right.get(randVal));
+            }
+        }
     }
 }
