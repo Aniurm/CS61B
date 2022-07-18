@@ -154,11 +154,33 @@ public class LinkedListDequeTest {
         lld.addLast((5));
         Iterator<Integer> test = lld.iterator();
         assertEquals(1, (int) test.next());
+        assertTrue(test.hasNext());
         assertEquals(2, (int) test.next());
+        assertTrue(test.hasNext());
         assertEquals(3, (int) test.next());
+        assertTrue(test.hasNext());
         assertEquals(4, (int) test.next());
+        assertTrue(test.hasNext());
         assertEquals(5, (int) test.next());
         assertFalse(test.hasNext());
+    }
+
+    @Test
+    public void manyIterators() {
+        LinkedListDeque<Integer> lld = new LinkedListDeque<>();
+        lld.addLast((1));
+        lld.addLast((2));
+        lld.addLast((3));
+        lld.addLast((4));
+        lld.addLast((5));
+        lld.addLast((1));
+        lld.addLast((2));
+        lld.addLast((3));
+        lld.addLast((4));
+        lld.addLast((5));
+        Iterator<Integer> inte1 = lld.iterator();
+        Iterator<Integer> inte2 = lld.iterator();
+
     }
 
     @Test

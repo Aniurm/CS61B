@@ -148,7 +148,7 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
         }
 
         public boolean hasNext() {
-            return cursor != null;
+            return cursor.item != null;
         }
 
         public T next() {
