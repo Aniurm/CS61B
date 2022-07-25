@@ -2,9 +2,6 @@ package bstmap;
 import java.util.Iterator;
 import java.util.Set;
 
-import afu.org.checkerframework.checker.oigj.qual.O;
-import edu.princeton.cs.algs4.BST;
-
 public class BSTMap<K extends Comparable, V> implements Map61B<K, V> {
     private BSTNode mapRoot;
 
