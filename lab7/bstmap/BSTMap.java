@@ -8,7 +8,7 @@ import edu.princeton.cs.algs4.BST;
 public class BSTMap<K extends Comparable, V> implements Map61B<K, V> {
     private BSTNode mapRoot;
 
-    BSTMap() {
+    public BSTMap() {
         mapRoot = null;
     }
 
