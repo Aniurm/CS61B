@@ -1,11 +1,9 @@
 package gitlet;
 
 
+import java.io.File;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date; // TODO: You'll likely use this in this class
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
 
 /** Represents a gitlet commit object.
  *  does at a high level.
@@ -20,12 +18,13 @@ public class Commit implements Serializable, Dumpable {
      */
 
     /** The message of this Commit. */
-    private String message;
-    private String timestamp;
-    private String father;
-    private String mother;
-    private List<String> blobs;
-    private String id;
+    private final String message;
+    private final String timestamp;
+    private final String father;
+    private final String mother;
+
+    // map: filename<-->sha1
+    private final Map<String, String> blobs;
 
     public Commit(String message, String parent) {
         this.message = message;
@@ -39,24 +38,61 @@ public class Commit implements Serializable, Dumpable {
             date = new Date();
         }
         timestamp = date.toString();
-        blobs = new ArrayList<>();
-        id = generateHash();
+        blobs = new HashMap<>();
     }
 
     public String generateHash() {
-        StringBuilder shaContent = new StringBuilder();
-        shaContent.append(message);
-        shaContent.append(timestamp);
-        shaContent.append(father);
-        shaContent.append(mother);
-        shaContent.append(blobs);
-        return Utils.sha1(shaContent.toString());
+        String shaContent = message +
+                timestamp +
+                father +
+                mother +
+                blobs;
+        return Utils.sha1(shaContent);
+    }
+
+    // get commit from commits folder according to sha1 value
+    public static Commit getCommit(String sha1) {
+        File targetFile = Utils.join(Repository.COMMITS, sha1);
+        if (!targetFile.exists()) {
+            System.out.println("Target file does not exist.");
+            System.exit(0);
+        }
+        return Utils.readObject(targetFile, Commit.class);
+    }
+
+    public static Commit getCommitByPointer(String pointerName) {
+        File pointer = Utils.join(Repository.REFS, pointerName);
+        if (!pointer.exists()) {
+            System.out.println("Pointer not exist");
+            System.exit(0);
+        }
+        String sha1 = Utils.readContentsAsString(pointer);
+        File commitFile = Utils.join(Repository.COMMITS, sha1);
+        return Utils.readObject(commitFile, Commit.class);
+    }
+
+    public Map<String, String> getBlobs() {
+        return blobs;
+    }
+
+    public static void copyBlobs(Commit des, Commit src) {
+        Map<String, String> srcBlobs = src.getBlobs();
+        for (String key : srcBlobs.keySet()) {
+            des.getBlobs().put(key, srcBlobs.get(key));
+        }
+    }
+
+    public void saveCommit() {
+        File commitFile = Utils.join(Repository.COMMITS, this.generateHash());
+        Utils.writeObject(commitFile, this);
+    }
+
+    public boolean fileInCommit(String fileName) {
+        return this.blobs.containsKey(fileName);
     }
 
     @Override
     public void dump() {
-        System.out.printf("size: %d%nmapping: %s%n", _size, _mapping);
+        System.out.printf("message: %s\ntimestamp: %s\nfather: %s\nmother: %s\nblobs:%s\n", message, timestamp, father, mother, blobs);
     }
-        int _size;
-        TreeMap<String, String> _mapping = new TreeMap<>();
 }

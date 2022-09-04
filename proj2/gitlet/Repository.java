@@ -16,8 +16,7 @@ import static gitlet.Utils.*;
  *  @author Aniurm
  */
 public class Repository {
-    /**
-     *
+    /*
      * List all instance variables of the Repository class here with a useful
      * comment above them describing what that variable represents and how that
      * variable is used. We've provided two examples for you.
@@ -27,14 +26,14 @@ public class Repository {
     public static final File CWD = new File(System.getProperty("user.dir"));
     /** The .gitlet directory. */
     public static final File GITLET_DIR = join(CWD, ".gitlet");
-    private static final File COMMITS = join(GITLET_DIR, "commits");
-    private static final File BLOBS = join(GITLET_DIR, "blobs");
-    private static final File REFS = join(GITLET_DIR, "refs");
-    private static final File INDEX = join(GITLET_DIR, "index");
+    public static final File COMMITS = join(GITLET_DIR, "commits");
+    public static final File BLOBS = join(GITLET_DIR, "blobs");
+    public static final File REFS = join(GITLET_DIR, "refs");
+    public static final File INDEX = join(GITLET_DIR, "index");
 
 
     // store all commands
-    private static Set<String> commands = new HashSet<>(Arrays.asList("init", "add", "commit", "rm", "log", "global-log", "find", "status", "checkout", "branch", "rm-branch", "reset", "merge"));
+    private static final Set<String> commands = new HashSet<>(Arrays.asList("init", "add", "commit", "rm", "log", "global-log", "find", "status", "checkout", "branch", "rm-branch", "reset", "merge"));
 
     // true means has error, false means no error
     public static void basicCommandError(String[] args) {
@@ -96,17 +95,20 @@ public class Repository {
         // make commit and pointer
         Commit initCommit = new Commit("initial commit", null);
         String shaID = initCommit.generateHash();
-        File commitFile = join(COMMITS, shaID);
-        File master = join(REFS, "master");
-        try {
-            master.createNewFile();
-        } catch (IOException excp) {
-            System.out.println("error");
-        }
+        Pointer.makePointer("master");
+        Pointer.makePointer("HEAD");
 
         // store information
-        writeContents(master, shaID);
-        writeObject(commitFile, initCommit);
+        Pointer.writePointer("master", shaID);
+        Pointer.writePointer("HEAD", shaID);
+        initCommit.saveCommit();
+    }
+
+    public static void deleteFile(File target) {
+        if (!target.delete()) {
+            System.out.println("Fail to delete");
+            System.exit(0);
+        }
     }
 
     private static boolean initialized() {
@@ -116,8 +118,8 @@ public class Repository {
     //Adds a copy of the file as it currently exists to the staging area
     public static void add(String[] args) {
         // read staging area
-        Stage area = readObject(INDEX, Stage.class);
-        Map<String, String> map = area.getMap();
+        Stage area = Stage.getStage();
+        Map<String, String> addMap = area.getAddMap();
         // get file pointer
         String name = args[1];
         File target = join(CWD, name);
@@ -126,24 +128,102 @@ public class Repository {
             System.out.println("File does not exist.");
             System.exit(0);
         }
-        // already in staging area
-        if (map.containsKey(name)) {
-            // delete old blob
-            String oldSha1 = map.get(name);
-            File oldBlob = join(BLOBS, oldSha1);
-            if (!restrictedDelete(oldBlob)) {
-                System.out.println("Fail to delete.");
-                System.exit(0);
-            }
-        }
-        // write new blob
+        // get head commit and blobs
+        Commit headCommit = Commit.getCommitByPointer("HEAD");
+        Map<String, String> blobs = headCommit.getBlobs();
+        // compare with current commit
         String newContent = readContentsAsString(target);
         Blob newBlob = new Blob(newContent);
         String newSha1 = newBlob.generateHash();
+        /*
+         * If the current working version of the file is identical to
+         * the version in the current commit, do not stage it to be added,
+         * and remove it from the staging area if it is already there
+         */
+        if (headCommit.fileInCommit(name) && newSha1.equals(blobs.get(name))) {
+            // check if it is in add staging area
+            if (area.inAddArea(name)) {
+                area.deleteFromAdd(name);
+            }
+            return;
+        }
+
+        // already in staging area
+        if (area.inAddArea(name)) {
+            // delete old blob
+            String oldSha1 = addMap.get(name);
+            File oldBlob = join(BLOBS, oldSha1);
+            deleteFile(oldBlob);
+        }
         writeObject(join(BLOBS, newSha1), newBlob);
-        // change stage information
-        map.put(name, newSha1);
+        addMap.put(name, newSha1);
         // renew stage
-        writeObject(INDEX, area);
+        area.update();
+    }
+
+    public static void commit(String[] args) {
+        // construct new commit
+        String fatherSha1 = Pointer.getData("HEAD");
+        Commit newCommit = new Commit(args[1], fatherSha1);
+        // get father commit
+        Commit father = Commit.getCommit(fatherSha1);
+        // copy blobs
+        Commit.copyBlobs(newCommit, father);
+        // add blobs from staging area:
+        // If already exists in the blobMap of father commit, overwrite
+        // else add new blob
+        Stage stage = Stage.getStage();
+        Map<String, String> stageMap = stage.getAddMap();
+        Map<String, String> blobMap = newCommit.getBlobs();
+        for (String filename : stageMap.keySet()) {
+            addBlob(blobMap, stageMap, filename);
+        }
+        newCommit.saveCommit();
+        // update pointers
+        String newSha1 = newCommit.generateHash();
+        Pointer.writePointer("master", newSha1);
+        Pointer.writePointer("HEAD", newSha1);
+        // clear staging area
+        stage.clear();
+        stage.saveStage();
+    }
+
+    private static void addBlob(Map<String, String> blobMap, Map<String, String> stageMap, String filename) {
+        // get blob name from staging area
+        String newBlobName = stageMap.get(filename);
+        // change the blobMap of newCommit
+        blobMap.put(filename, newBlobName);
+    }
+
+    public static void rm(String[] args) {
+        String targetName = args[1];
+        File targetFile = join(CWD, targetName);
+
+        // get stage and head commit
+        Stage stage = Stage.getStage();
+        Commit headCommit = Commit.getCommitByPointer("HEAD");
+
+        // check
+        if (!stage.inAddArea(targetName) && !headCommit.fileInCommit(targetName)) {
+            System.out.println("No reason to remove the file.");
+            System.exit(0);
+        }
+        // tracked by current commit
+        if (headCommit.fileInCommit(targetName)) {
+            // stage it for removal
+            stage.stageForRemoval(targetName);
+            // remove the file from the working directory if the user has not already done so
+            if (targetFile.exists()) {
+                Utils.restrictedDelete(targetFile);
+            }
+        }
+        // Unstage the file if it is currently staged for addition
+        if (stage.inAddArea(targetName)) {
+            // delete blob
+            stage.deleteBlob(targetName);
+            // update stage
+            stage.deleteFromAdd(targetName);
+        }
+        stage.update();
     }
 }

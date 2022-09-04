@@ -18,7 +18,12 @@ public class Main {
             case "add":
                 Repository.add(args);
                 break;
-            // TODO: FILL THE REST IN
+            case "commit":
+                Repository.commit(args);
+                break;
+            case "rm":
+                Repository.rm(args);
+                break;
         }
     }
 }
