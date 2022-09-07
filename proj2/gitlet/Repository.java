@@ -243,10 +243,30 @@ public class Repository {
 
     public static void global_log() {
         List<String> allCommits = plainFilenamesIn(COMMITS);
-        Commit cur = null;
+        Commit cur;
         for (String commitName : allCommits) {
             cur = Commit.getCommit(commitName);
             cur.displayCommit();
+        }
+    }
+
+    public static void find(String[] args) {
+        List<String> allCommits = plainFilenamesIn(COMMITS);
+        List<String> results = new ArrayList<>();
+        Commit cur;
+        for (String commitName : allCommits) {
+            cur = Commit.getCommit(commitName);
+            if (cur.getMessage().equals(args[1])) {
+                results.add(commitName);
+            }
+        }
+        int size = results.size();
+        if (size == 0) {
+            System.out.println("Found no commit with that message.");
+            return;
+        }
+        for (String result : results) {
+            System.out.println(result);
         }
     }
 }

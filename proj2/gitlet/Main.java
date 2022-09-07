@@ -30,6 +30,9 @@ public class Main {
             case "global-log":
                 Repository.global_log();
                 break;
+            case "find":
+                Repository.find(args);
+                break;
         }
     }
 }

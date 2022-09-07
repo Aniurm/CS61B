@@ -81,6 +81,10 @@ public class Commit implements Serializable, Dumpable {
         return father;
     }
 
+    public String getMessage() {
+        return message;
+    }
+
     public Map<String, String> getBlobs() {
         return blobs;
     }
