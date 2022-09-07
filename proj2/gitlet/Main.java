@@ -27,6 +27,9 @@ public class Main {
             case "log":
                 Repository.log();
                 break;
+            case "global-log":
+                Repository.global_log();
+                break;
         }
     }
 }

@@ -2,10 +2,7 @@ package gitlet;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static gitlet.Utils.*;
 
@@ -241,6 +238,15 @@ public class Repository {
             cur.displayCommit();
             nextSha1 = cur.getFather();
             cur = Commit.getCommit(nextSha1);
+        }
+    }
+
+    public static void global_log() {
+        List<String> allCommits = plainFilenamesIn(COMMITS);
+        Commit cur = null;
+        for (String commitName : allCommits) {
+            cur = Commit.getCommit(commitName);
+            cur.displayCommit();
         }
     }
 }
