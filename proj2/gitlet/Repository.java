@@ -226,4 +226,21 @@ public class Repository {
         }
         stage.update();
     }
+
+    /*
+    * Starting at the current head commit,
+    * display information about each commit
+    * backwards along the commit tree until the initial commit,
+    * following the first parent commit links
+    * ignoring any second parents found in merge commits.
+    * */
+    public static void log() {
+        Commit cur = Commit.getCommitByPointer("HEAD");
+        String nextSha1 = null;
+        while (cur != null) {
+            cur.displayCommit();
+            nextSha1 = cur.getFather();
+            cur = Commit.getCommit(nextSha1);
+        }
+    }
 }

@@ -52,6 +52,9 @@ public class Commit implements Serializable, Dumpable {
 
     // get commit from commits folder according to sha1 value
     public static Commit getCommit(String sha1) {
+        if (sha1 == null || sha1.length() == 0) {
+            return null;
+        }
         File targetFile = Utils.join(Repository.COMMITS, sha1);
         if (!targetFile.exists()) {
             System.out.println("Target file does not exist.");
@@ -61,6 +64,9 @@ public class Commit implements Serializable, Dumpable {
     }
 
     public static Commit getCommitByPointer(String pointerName) {
+        if (pointerName == null || pointerName.length() == 0) {
+            return null;
+        }
         File pointer = Utils.join(Repository.REFS, pointerName);
         if (!pointer.exists()) {
             System.out.println("Pointer not exist");
@@ -69,6 +75,10 @@ public class Commit implements Serializable, Dumpable {
         String sha1 = Utils.readContentsAsString(pointer);
         File commitFile = Utils.join(Repository.COMMITS, sha1);
         return Utils.readObject(commitFile, Commit.class);
+    }
+
+    public String getFather() {
+        return father;
     }
 
     public Map<String, String> getBlobs() {
@@ -91,6 +101,13 @@ public class Commit implements Serializable, Dumpable {
         return this.blobs.containsKey(fileName);
     }
 
+    public void displayCommit() {
+        System.out.println("===");
+        System.out.println("commit " + this.generateHash());
+        System.out.println("Date: " + this.timestamp);
+        System.out.println(message);
+        System.out.println(" ");
+    }
     @Override
     public void dump() {
         System.out.printf("message: %s\ntimestamp: %s\nfather: %s\nmother: %s\nblobs:%s\n", message, timestamp, father, mother, blobs);
