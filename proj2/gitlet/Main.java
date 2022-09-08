@@ -33,6 +33,9 @@ public class Main {
             case "find":
                 Repository.find(args);
                 break;
+            case "status":
+                Repository.status();
+                break;
         }
     }
 }

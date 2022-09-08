@@ -269,4 +269,40 @@ public class Repository {
             System.out.println(result);
         }
     }
+
+    public static void status() {
+        // Branches
+        System.out.println("=== Branches ===");
+        List<String> allPointers = plainFilenamesIn(REFS);
+        String content;
+        String headContent = Pointer.getData("HEAD");
+        for (String each : allPointers) {
+            if (!each.equals("HEAD")) {
+                content = readContentsAsString(join(REFS, each));
+                if (content.equals(headContent)) {
+                    System.out.print("*");
+                }
+                System.out.println(each);
+            }
+        }
+        System.out.println(" ");
+
+        // Staged Files
+        System.out.println("=== Staged Files ===");
+        Stage cur = Stage.getStage();
+        Map<String, String> addMap = cur.getAddMap();
+        List<String> output = new ArrayList<>(addMap.keySet());
+        Collections.sort(output);
+        for (String each : output) {
+            System.out.println(each);
+        }
+        System.out.println(" ");
+        System.out.println("=== Removed Files ===");
+        Set<String> deleteSet = cur.getDeleteSet();
+        output = new ArrayList<>(deleteSet);
+        for (String each : output) {
+            System.out.println(each);
+        }
+        System.out.println(" ");
+    }
 }
