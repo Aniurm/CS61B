@@ -18,13 +18,13 @@ public class Pointer {
         writePointer(name, data);
     }
 
-    public static void writePointer(String name, String data) {
-        File pointer = Utils.join(Repository.REFS, name);
+    public static void writePointer(String pointerName, String data) {
+        File pointer = Utils.join(Repository.REFS, pointerName);
         Utils.writeContents(pointer, data);
     }
 
-    public static String getData(String name) {
-        File pointer = Utils.join(Repository.REFS, name);
+    public static String getData(String pointerName) {
+        File pointer = Utils.join(Repository.REFS, pointerName);
         if (!pointer.exists()) {
             System.out.println("File doesn't exist.");
             System.exit(0);

@@ -32,6 +32,12 @@ public class Repository {
     // store all commands
     private static final Set<String> commands = new HashSet<>(Arrays.asList("init", "add", "commit", "rm", "log", "global-log", "find", "status", "checkout", "branch", "rm-branch", "reset", "merge"));
 
+    private static void overWriteCWDFile(String filename, String srcData) {
+        File cwdFile = join(CWD, filename);
+        restrictedDelete(cwdFile);
+        writeContents(cwdFile, srcData);
+    }
+
     // true means has error, false means no error
     public static void basicCommandError(String[] args) {
         if (args.length == 0) {
@@ -155,7 +161,7 @@ public class Repository {
         writeObject(join(BLOBS, newSha1), newBlob);
         addMap.put(name, newSha1);
         // renew stage
-        area.update();
+        area.saveStage();
     }
 
     public static void commit(String[] args) {
@@ -170,11 +176,7 @@ public class Repository {
         // If already exists in the blobMap of father commit, overwrite
         // else add new blob
         Stage stage = Stage.getStage();
-        Map<String, String> stageMap = stage.getAddMap();
-        Map<String, String> blobMap = newCommit.getBlobs();
-        for (String filename : stageMap.keySet()) {
-            addBlob(blobMap, stageMap, filename);
-        }
+        newCommit.addBlobsFromStage(stage);
         newCommit.saveCommit();
         // update pointers
         String newSha1 = newCommit.generateHash();
@@ -185,12 +187,6 @@ public class Repository {
         stage.saveStage();
     }
 
-    private static void addBlob(Map<String, String> blobMap, Map<String, String> stageMap, String filename) {
-        // get blob name from staging area
-        String newBlobName = stageMap.get(filename);
-        // change the blobMap of newCommit
-        blobMap.put(filename, newBlobName);
-    }
 
     public static void rm(String[] args) {
         String targetName = args[1];
@@ -221,7 +217,7 @@ public class Repository {
             // update stage
             stage.deleteFromAdd(targetName);
         }
-        stage.update();
+        stage.saveStage();
     }
 
     /*
@@ -318,21 +314,15 @@ public class Repository {
     }
 
     private static void checkoutOne(String filename) {
-        Map<String, String> blobs = Commit.getCommitByPointer("HEAD").getBlobs();
-        // check exist
-        if (!blobs.containsKey(filename)) {
-            System.out.println("File does not exist in that commit.");
-            System.exit(0);
-        }
-
-        String srcData = Blob.getBlobDataByName(blobs.get(filename));
-        File cwdFile = join(CWD, filename);
-        restrictedDelete(cwdFile);
-        writeContents(cwdFile, srcData);
+        Commit commit = Commit.getCommitByPointer("HEAD");
+        String srcData = commit.getBlobData(filename);
+        overWriteCWDFile(filename, srcData);
     }
 
     private static void checkoutTwo(String commitID, String filename) {
-
+        Commit commit = Commit.getCommitShort(commitID);
+        String srcData = commit.getBlobData(filename);
+        overWriteCWDFile(filename, srcData);
     }
 
     private static void checkoutThree(String branchName) {

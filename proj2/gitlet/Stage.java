@@ -49,10 +49,6 @@ public class Stage implements Serializable, Dumpable {
         deleteSet.add(fileName);
     }
 
-    public void update() {
-        Utils.writeObject(Repository.INDEX, this);
-    }
-
     // Delete the corresponding blob of file
     public void deleteBlob(String filename) {
         String blobName = this.addMap.get(filename);

@@ -57,10 +57,24 @@ public class Commit implements Serializable, Dumpable {
         }
         File targetFile = Utils.join(Repository.COMMITS, sha1);
         if (!targetFile.exists()) {
-            System.out.println("Target file does not exist.");
+            System.out.println("No commit with that id exists.");
             System.exit(0);
         }
         return Utils.readObject(targetFile, Commit.class);
+    }
+
+    // naively approach to find commit using shortened id
+    public static Commit getCommitShort(String prefix) {
+        List<String> allCommits = Utils.plainFilenamesIn(Repository.COMMITS);
+        for (String each : allCommits) {
+            if(each.startsWith(prefix)) {
+                File commitFile = Utils.join(Repository.COMMITS, each);
+                return Utils.readObject(commitFile, Commit.class);
+            }
+        }
+        System.out.println("No commit with that id exists.");
+        System.exit(0);
+        return null;
     }
 
     public static Commit getCommitByPointer(String pointerName) {
@@ -85,6 +99,14 @@ public class Commit implements Serializable, Dumpable {
         return message;
     }
 
+    public String getBlobData(String filename) {
+        if (!blobs.containsKey(filename)) {
+            System.out.println("File does not exist in that commit");
+            System.exit(0);
+        }
+        return Blob.getBlobDataByName(blobs.get(filename));
+    }
+
     public Map<String, String> getBlobs() {
         return blobs;
     }
@@ -94,6 +116,17 @@ public class Commit implements Serializable, Dumpable {
         for (String key : srcBlobs.keySet()) {
             des.getBlobs().put(key, srcBlobs.get(key));
         }
+    }
+
+    public void addBlobsFromStage(Stage stage) {
+        Map<String, String> stageMap = stage.getAddMap();
+        for (String filename : stageMap.keySet()) {
+            addBlob(filename, stageMap.get(filename));
+        }
+    }
+
+    private void addBlob(String filename, String sha1) {
+        this.blobs.put(filename, sha1);
     }
 
     public void saveCommit() {
@@ -112,6 +145,8 @@ public class Commit implements Serializable, Dumpable {
         System.out.println(message);
         System.out.println(" ");
     }
+
+
     @Override
     public void dump() {
         System.out.printf("message: %s\ntimestamp: %s\nfather: %s\nmother: %s\nblobs:%s\n", message, timestamp, father, mother, blobs);
