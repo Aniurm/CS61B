@@ -36,6 +36,9 @@ public class Main {
             case "status":
                 Repository.status();
                 break;
+            case "checkout":
+                Repository.checkout(args);
+                break;
         }
     }
 }

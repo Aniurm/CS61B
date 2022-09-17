@@ -305,4 +305,37 @@ public class Repository {
         }
         System.out.println(" ");
     }
+
+    public static void checkout(String[] args) {
+        int size = args.length;
+        if (size == 3) {
+            checkoutOne(args[2]);
+        } else if (size == 4) {
+            checkoutTwo(args[1], args[3]);
+        } else if (size == 2) {
+            checkoutThree(args[1]);
+        }
+    }
+
+    private static void checkoutOne(String filename) {
+        Map<String, String> blobs = Commit.getCommitByPointer("HEAD").getBlobs();
+        // check exist
+        if (!blobs.containsKey(filename)) {
+            System.out.println("File does not exist in that commit.");
+            System.exit(0);
+        }
+
+        String srcData = Blob.getBlobDataByName(blobs.get(filename));
+        File cwdFile = join(CWD, filename);
+        restrictedDelete(cwdFile);
+        writeContents(cwdFile, srcData);
+    }
+
+    private static void checkoutTwo(String commitID, String filename) {
+
+    }
+
+    private static void checkoutThree(String branchName) {
+
+    }
 }

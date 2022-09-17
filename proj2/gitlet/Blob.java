@@ -23,6 +23,10 @@ public class Blob implements Serializable, Dumpable {
         writeObject(join(Repository.BLOBS, newSha1), newBlob);
     }
 
+    public static String getBlobDataByName(String blobName) {
+        return Utils.readObject(join(Repository.BLOBS, blobName), Blob.class).data;
+    }
+
     @Override
     public void dump() {
         System.out.printf("data: %s\n", data);
